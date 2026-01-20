@@ -1,34 +1,20 @@
 #include "push_swap.h"
 
-void decide_sort(t_stack *stack_a, int size)
+void decide_sort(t_stack *stack_a, t_stack *stack_b, int size)
 {
+    if (is_sorted(stack_a))
+        return ;
     if (size == 2)
     {
-        if (stack_a->top > stack_a->top->next)
-            ra(stack_a);
-        else if (stack_a->top < stack_a->top->next)
-            rra(stack_a);
+        if (stack_a->top->value > stack_a->top->next->value)
+            sa(stack_a);
     }
     else if (size == 3)
-    {
-        
-    }
-}
-
-static int	is_sorted(t_stack *stack)
-{
-	t_node	*current;
-
-	if (!stack || !stack->top || !stack->top->next)
-		return (1);
-	current = stack->top;
-	while (current->next)
-	{
-		if (current->value > current->next->value)
-			return (0);
-		current = current->next;
-	}
-	return (1);
+        sort_for_three(stack_a);
+    else if (size == 4)
+        sort_for_four(stack_a, stack_b);
+    else if (size == 5)
+        sort_for_five(stack_a, stack_b);
 }
 
 int main(int argc, char **argv)
@@ -61,8 +47,12 @@ int main(int argc, char **argv)
         write(2, "Error\n", 6);
         return (1);
     }
-    // TODO: Add sorting logic here
-    // sort_stack(&stack_a, &stack_b);
+    
+    if (stack_a.size <= 5)
+        decide_sort(&stack_a, &stack_b, stack_a.size);
+    // TODO: Add sorting logic for larger stacks
+    // else
+    //     sort_stack(&stack_a, &stack_b);
     
     return (0);
 }

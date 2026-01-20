@@ -44,4 +44,13 @@ int		ft_isdigit(char c);
 int		parse_input(char **raw_input, t_stack *stack);
 int		has_duplicates(t_stack *stack);
 
+// Sort functions
+int		is_sorted(t_stack *stack);
+void	sort_for_three(t_stack *stack_a);
+void	sort_for_four(t_stack *stack_a, t_stack *stack_b);
+void	sort_for_five(t_stack *stack_a, t_stack *stack_b);
+int		find_min(t_stack *stack);
+int		find_second_min(t_stack *stack, int min1);
+void	decide_sort(t_stack *stack_a, t_stack *stack_b, int size);
+
 #endif
