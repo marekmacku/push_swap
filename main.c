@@ -50,9 +50,11 @@ int main(int argc, char **argv)
     
     if (stack_a.size <= 5)
         decide_sort(&stack_a, &stack_b, stack_a.size);
-    // TODO: Add sorting logic for larger stacks
-    // else
-    //     sort_stack(&stack_a, &stack_b);
+    else
+    {
+        normalize(&stack_a);
+        sort_large(&stack_a, &stack_b,  stack_a.size);
+    }
     
     return (0);
 }

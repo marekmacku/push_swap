@@ -25,7 +25,10 @@ void sort_for_three(t_stack *stack_a)
     if (is_sorted(stack_a))
         return ;
     if (first < second && first < third && second > third)
-        rra(stack_a);
+    {
+        sa(stack_a);
+        ra(stack_a);
+    }
     else if (second < first && second < third && first < third)
         sa(stack_a);
     else if (first < second && second > third && first > third)
@@ -88,13 +91,21 @@ int find_second_min(t_stack *stack, int min1)
 
 void sort_for_four(t_stack *stack_a, t_stack *stack_b)
 {
-    int min;
+    int min, pos;
 
     if (!stack_a)
         return ;
     min = find_min(stack_a);
+    pos = get_position_in_stack(stack_a, min);
+    
+    // Use optimal rotation direction
     while (stack_a->top->value != min)
-        ra(stack_a);
+    {
+        if (pos <= stack_a->size / 2)
+            ra(stack_a);
+        else
+            rra(stack_a);
+    }
     pb(stack_a, stack_b);
     sort_for_three(stack_a);
     pa(stack_a, stack_b);
@@ -102,7 +113,7 @@ void sort_for_four(t_stack *stack_a, t_stack *stack_b)
 
 void sort_for_five(t_stack *stack_a, t_stack *stack_b)
 {
-    int min1, min2;
+    int min1, min2, pos1, pos2, closest_pos;
 
     if (!stack_a)
         return ;
@@ -113,7 +124,21 @@ void sort_for_five(t_stack *stack_a, t_stack *stack_b)
         if (stack_a->top->value == min1 || stack_a->top->value == min2)
             pb(stack_a, stack_b);
         else
-            ra(stack_a);
+        {
+            pos1 = get_position_in_stack(stack_a, min1);
+            pos2 = get_position_in_stack(stack_a, min2);
+            
+            // Find which minimum is closer
+            closest_pos = pos1;
+            if (pos2 != -1 && (pos1 == -1 || pos2 < pos1))
+                closest_pos = pos2;
+            
+            // Choose optimal rotation direction
+            if (closest_pos <= stack_a->size / 2)
+                ra(stack_a);
+            else
+                rra(stack_a);
+        }
     }
     sort_for_three(stack_a);
     if (stack_b->size == 2 && stack_b->top->value > stack_b->top->next->value)

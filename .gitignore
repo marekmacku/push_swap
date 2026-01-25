@@ -2,6 +2,10 @@
 push_swap
 test_normalize
 testNormalize
+test_simple
+test_sort_large
+testSimple
+testSortLarge
 *.out
 
 # Object files
@@ -12,6 +16,8 @@ testNormalize
 
 # Test files
 test_normalize.c
+test_simple.c
+test_sort_large.c
 
 # Editor files
 .vscode/

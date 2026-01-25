@@ -25,38 +25,83 @@ char *allocate_string(int size)
     return (result);
 }
 
-char    **ft_split(char const *s, char c)
+static int	count_words(char const *s, char c)
 {
-    char **result;
-    int i;
-    int break_count;
-    int y;
+	int	count;
+	int	in_word;
 
-    i = 0;
-    break_count = 0;
-    while (s[i])
-    {
-        if (s[i] == c)
-            break_count++;
-        i++;
-    }
-    result = malloc(break_count * sizeof(char *));
-    if (result == NULL)
-        return (NULL);
-    i = 0;
-    break_count = 0;
-    y = 0;
-    while (s[i])
-    {
-        if (s[i] == c)
-        {
-            result[y] = allocate_string(i - y + 1);
-            result[y] = fill_string(result[y], &s[i], i - y);
-            y++;
-        }
-        i++;
-    }
-    return (result);
+	count = 0;
+	in_word = 0;
+	while (*s)
+	{
+		if (*s != c && !in_word)
+		{
+			in_word = 1;
+			count++;
+		}
+		else if (*s == c)
+			in_word = 0;
+		s++;
+	}
+	return (count);
+}
+
+static char	*extract_word(char const *s, char c, int *start)
+{
+	int		len;
+	char	*word;
+	int		i;
+
+	while (s[*start] == c)
+		(*start)++;
+	if (s[*start] == '\0')
+		return (NULL);
+	len = 0;
+	while (s[*start + len] != c && s[*start + len] != '\0')
+		len++;
+	word = malloc(len + 1);
+	if (!word)
+		return (NULL);
+	i = 0;
+	while (i < len)
+	{
+		word[i] = s[*start + i];
+		i++;
+	}
+	word[i] = '\0';
+	*start += len;
+	return (word);
+}
+
+char	**ft_split(char const *s, char c)
+{
+	char	**result;
+	int		word_count;
+	int		pos;
+	int		idx;
+
+	if (!s)
+		return (NULL);
+	word_count = count_words(s, c);
+	result = malloc((word_count + 1) * sizeof(char *));
+	if (!result)
+		return (NULL);
+	pos = 0;
+	idx = 0;
+	while (idx < word_count)
+	{
+		result[idx] = extract_word(s, c, &pos);
+		if (!result[idx])
+		{
+			while (idx > 0)
+				free(result[--idx]);
+			free(result);
+			return (NULL);
+		}
+		idx++;
+	}
+	result[idx] = NULL;
+	return (result);
 }
 
 // Helper to free the array returned by ft_split
@@ -74,32 +119,32 @@ void free_split(char **arr)
     free(arr);
 }
 
-int main(void)
-{
-    char *str = "Hello,,World,this,is,,42";
-    char delimiter = ',';
+// int main(void)
+// {
+//     char *str = "Hello,,World,this,is,,42";
+//     char delimiter = ',';
 
-    char **result = ft_split(str, delimiter);
+//     char **result = ft_split(str, delimiter);
 
-    if (!result)
-    {
-        printf("ft_split returned NULL\n");
-        return 1;
-    }
+//     if (!result)
+//     {
+//         printf("ft_split returned NULL\n");
+//         return 1;
+//     }
 
-    printf("Input string: \"%s\"\n", str);
-    printf("Delimiter: '%c'\n\n", delimiter);
+//     printf("Input string: \"%s\"\n", str);
+//     printf("Delimiter: '%c'\n\n", delimiter);
 
-    // Print each resulting string
-    int i = 0;
-    while (result[i])
-    {
-        printf("result[%d] = \"%s\"\n", i, result[i]);
-        i++;
-    }
+//     // Print each resulting string
+//     int i = 0;
+//     while (result[i])
+//     {
+//         printf("result[%d] = \"%s\"\n", i, result[i]);
+//         i++;
+//     }
 
-    // Free everything
-    free_split(result);
+//     // Free everything
+//     free_split(result);
 
-    return 0;
-}
+//     return 0;
+// }

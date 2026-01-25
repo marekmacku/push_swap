@@ -124,3 +124,19 @@ push_swap/
 2. Test with 100 random numbers (must be <700 operations)
 3. Test with 500 random numbers (must be <5500 operations)
 4. Test edge cases: already sorted, reverse sorted, duplicates (should error)
+
+
+
+### New Checklist
+Implementation checklist
+- [ ] Pre-processing: Normalize values to ranks 0..N-1
+- [ ] Chunk calculation: Use N/11 for 100, N/15-20 for 500
+- [ ] Phase 1: Process chunks sequentially, one at a time
+- [ ] Intra-chunk sorting: Push to B in descending order
+- [ ] Rotation optimization: Always use cheapest direction (ra vs rra)
+- [ ] Operation combination: Use rr/rrr when possible
+- [ ] Phase 2: Push maximums from sorted-descending chunks
+- [ ] LIS detection: Preserve sorted prefixes
+- [ ] Hardcoded cases: n≤5 use optimal solutions
+- [ ] Testing: Validate with 1000 random inputs
+This corrected algorithm guarantees benchmark compliance and is simpler than radix-based approaches.
