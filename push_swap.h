@@ -3,6 +3,7 @@
 
 # include <stdlib.h>
 # include <unistd.h>
+# include <limits.h>
 
 /* Stack node structure */
 typedef struct s_node
@@ -17,6 +18,18 @@ typedef struct s_stack
 	t_node	*top;
 	int		size;
 }	t_stack;
+
+/* Move info structure for cost-based optimization */
+typedef struct s_move
+{
+	int		b_pos;
+	int		a_pos;
+	int		b_cost;
+	int		a_cost;
+	int		b_dir;
+	int		a_dir;
+	int		cost;
+}	t_move;
 
 /* Stack operations */
 void	push(t_stack **stack, t_node *node);
@@ -66,5 +79,11 @@ void	push_chunks_to_b(t_stack *stack_a, t_stack *stack_b, int chunk_count, int t
 void	push_back_to_a(t_stack *stack_a, t_stack *stack_b);
 void	rotate_to_top(t_stack *stack, int target_value, int is_stack_a);
 void	maintain_descending_order_b(t_stack *stack_b, int value);
+// Optimized chunking functions
+int		find_target_position(t_stack *stack_a, int value);
+int		calculate_move_cost(t_stack *stack_a, t_stack *stack_b, int b_pos, int a_target_pos);
+void	find_cheapest_move(t_stack *stack_a, t_stack *b, t_move *move);
+void	execute_move(t_stack *a, t_stack *b, t_move *move);
+void	push_back_to_a_optimized(t_stack *a, t_stack *b);
 
 #endif

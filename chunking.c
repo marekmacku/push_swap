@@ -138,7 +138,7 @@ void	sort_large(t_stack *stack_a, t_stack *stack_b, int size)
     
     chunk_count = calculate_chunk_count(size);
     push_chunks_to_b(stack_a, stack_b, chunk_count, size);
-    push_back_to_a(stack_a, stack_b);
+    push_back_to_a_optimized(stack_a, stack_b);
 }
 
 /* Phase 1: Push chunks to stack B sequentially */
@@ -178,12 +178,10 @@ void	push_chunks_to_b(t_stack *stack_a, t_stack *stack_b, int chunk_count, int t
 void	push_back_to_a(t_stack *stack_a, t_stack *stack_b)
 {
     int	max_in_b;
-    int rotation_a_cost;
 
     if (!stack_b || !stack_b->top)
         return ;
 
-    rotation_a_cost = 0;
     while (stack_b->top)
     {
         max_in_b = find_max_in_stack(stack_b);
@@ -278,6 +276,215 @@ void	maintain_descending_order_b(t_stack *stack_b, int value)
         rotation_count = reverse_cost;
         while (rotation_count-- > 0)
             rrb(stack_b);
+    }
+}
+
+// --------- --------- --------- OPTIMIZED WAY  --------- --------- ---------
+
+// Find where value from B should be inserted in sorted A
+int     find_target_position(t_stack *stack_a, int value)
+{
+    int     best_val;
+    int     target_pos;
+    int     pos;
+    t_node  *current;
+
+    if (!stack_a || !stack_a->top)
+        return (0);
+    best_val = stack_a->size;
+    target_pos = -1;
+    pos = 0;
+    current = stack_a->top;
+    while (current)
+    {
+        if (current->value > value && current->value < best_val)
+        {
+            best_val = current->value;
+            target_pos = pos;
+        }
+        current = current->next;
+        pos++;
+    }
+    if (target_pos == -1)
+        return (get_position_in_stack(stack_a, find_min(stack_a)));
+    return (target_pos);
+}
+
+int max(int a, int b)
+{
+    if (a > b)
+        return  (a);
+    return  (b);
+}
+
+// Calculate total cost for moving element at b_pos to its target in A
+// Returns the cost considering rr/rrr savings
+int     calculate_move_cost(t_stack *stack_a, t_stack *stack_b, int b_pos, int a_target_pos)
+{
+    int b_direction;
+    int a_direction;
+    int a_cost;
+    int b_cost;
+
+    b_direction = 0;
+    a_direction = 0;
+    a_cost = 0;
+    b_cost = 0;
+
+    if (b_pos <= stack_b->size / 2)
+    {
+        b_direction = 1;
+        b_cost = b_pos;
+    }
+    else
+    {
+        b_direction = -1;
+        b_cost = stack_b->size - b_pos;
+    }
+    if (a_target_pos <= stack_a->size / 2)
+    {
+        a_direction = 1;
+        a_cost = a_target_pos;
+    }
+    else
+    {
+        a_direction = -1;
+        a_cost = stack_a->size - a_target_pos;
+    }
+    if (a_direction == b_direction)
+        return (max(a_cost, b_cost));
+    return (a_cost + b_cost);
+}
+
+// Find the cheapest element in B and store move info
+// You can use a struct or pass pointers to store: b_pos, a_pos, directions
+static void calc_dir_cost(int pos, int size, int *dir, int *cost)
+{
+    if (pos <= size / 2)
+    {
+        *dir = 1;
+        *cost = pos;
+    }
+    else
+    {
+        *dir = -1;
+        *cost = size - pos;
+    }
+}
+
+static void update_best_move(t_move *move, int b_pos, int a_pos,
+    int b_cost, int a_cost, int b_dir, int a_dir, int total_cost)
+{
+    move->b_pos = b_pos;
+    move->a_pos = a_pos;
+    move->b_cost = b_cost;
+    move->a_cost = a_cost;
+    move->b_dir = b_dir;
+    move->a_dir = a_dir;
+    move->cost = total_cost;
+}
+
+static void check_and_update_move(t_stack *stack_a, t_stack *b,
+    t_move *move, int b_pos, int *best_cost, int value)
+{
+    int target_pos;
+    int total_cost;
+    int b_dir;
+    int a_dir;
+    int b_cost;
+    int a_cost;
+    
+    target_pos = find_target_position(stack_a, value);
+    calc_dir_cost(b_pos, b->size, &b_dir, &b_cost);
+    calc_dir_cost(target_pos, stack_a->size, &a_dir, &a_cost);
+    total_cost = calculate_move_cost(stack_a, b, b_pos, target_pos);
+    if (total_cost < *best_cost)
+    {
+        *best_cost = total_cost;
+        update_best_move(move, b_pos, target_pos, b_cost,
+            a_cost, b_dir, a_dir, total_cost);
+    }
+}
+
+void find_cheapest_move(t_stack *stack_a, t_stack *b, t_move *move)
+{
+    t_node *current_b;
+    int b_pos;
+    int best_cost;
+    
+    current_b = b->top;
+    b_pos = 0;
+    best_cost = INT_MAX;
+    while (current_b) 
+    {
+        check_and_update_move(stack_a, b, move, b_pos,
+            &best_cost, current_b->value);
+        current_b = current_b->next;
+        b_pos++;
+    }
+}
+
+static void do_common_rotations(t_stack *a, t_stack *b, int count, int dir)
+{
+    while (count > 0)
+    {
+        if (dir == 1)
+            rr(a, b);
+        else
+            rrr(a, b);
+        count--;
+    }
+}
+
+static void do_a_rotations(t_stack *a, int cost, int dir)
+{
+    while (cost > 0)
+    {
+        if (dir == 1)
+            ra(a);
+        else
+            rra(a);
+        cost--;
+    }
+}
+
+static void do_b_rotations(t_stack *b, int cost, int dir)
+{
+    while (cost > 0)
+    {
+        if (dir == 1)
+            rb(b);
+        else
+            rrb(b);
+        cost--;
+    }
+}
+
+void execute_move(t_stack *a, t_stack *b, t_move *move)
+{
+    int common_rotations;
+    
+    if (move->a_dir == move->b_dir && move->a_dir != 0)
+    {
+        common_rotations = (move->a_cost < move->b_cost)
+            ? move->a_cost : move->b_cost;
+        do_common_rotations(a, b, common_rotations, move->a_dir);
+        move->a_cost -= common_rotations;
+        move->b_cost -= common_rotations;
+    }
+    do_a_rotations(a, move->a_cost, move->a_dir);
+    do_b_rotations(b, move->b_cost, move->b_dir);
+}
+
+void push_back_to_a_optimized(t_stack *a, t_stack *b)
+{
+    t_move move;
+    
+    while (b->top)
+    {
+        find_cheapest_move(a, b, &move);
+        execute_move(a, b, &move);
+        pa(a, b);
     }
 }
 
