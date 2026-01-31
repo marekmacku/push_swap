@@ -1,48 +1,5 @@
 #include "push_swap.h"
 
-static void	swap_int(int *a, int *b)
-{
-	int	temp;
-
-	temp = *a;
-	*a = *b;
-	*b = temp;
-}
-
-static int	partition(int *arr, int low, int high)
-{
-	int	pivot;
-	int	i;
-	int	j;
-
-	pivot = arr[high];
-	i = low - 1;
-	j = low;
-	while (j < high)
-	{
-		if (arr[j] <= pivot)
-		{
-			i++;
-			swap_int(&arr[i], &arr[j]);
-		}
-		j++;
-	}
-	swap_int(&arr[i + 1], &arr[high]);
-	return (i + 1);
-}
-
-static void	quicksort(int *arr, int low, int high)
-{
-	int	pivot_index;
-
-	if (low < high)
-	{
-		pivot_index = partition(arr, low, high);
-		quicksort(arr, low, pivot_index - 1);
-		quicksort(arr, pivot_index + 1, high);
-	}
-}
-
 static int	binary_search_rank(int *arr, int size, int target)
 {
 	int	left;
@@ -64,12 +21,24 @@ static int	binary_search_rank(int *arr, int size, int target)
 	return (-1);
 }
 
+static void	assign_ranks(t_node *current, int *arr, t_stack *stack_a)
+{
+	int rank;
+
+	while (current)
+	{
+		rank = binary_search_rank(arr, stack_a->size, current->value);
+		if (rank != -1)
+			current->value = rank;
+		current = current->next;
+	}
+}
+
 void	normalize(t_stack *stack_a)
 {
 	int		*arr;
 	t_node	*current;
 	int		i;
-	int		rank;
 
 	if (!stack_a || !stack_a->top)
 		return ;
@@ -86,12 +55,6 @@ void	normalize(t_stack *stack_a)
 	}
 	quicksort(arr, 0, stack_a->size - 1);
 	current = stack_a->top;
-	while (current)
-	{
-		rank = binary_search_rank(arr, stack_a->size, current->value);
-		if (rank != -1)
-			current->value = rank;
-		current = current->next;
-	}
+	assign_ranks(current, arr, stack_a);
 	free(arr);
 }

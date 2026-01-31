@@ -1,15 +1,12 @@
 #include "push_swap.h"
 
-// Find where value from B should be inserted in sorted A
-int     find_target_position(t_stack *stack_a, int value)
+static int  find_best_insert_pos(t_stack *stack_a, int value)
 {
     int     best_val;
     int     target_pos;
     int     pos;
     t_node  *current;
 
-    if (!stack_a || !stack_a->top)
-        return (0);
     best_val = stack_a->size;
     target_pos = -1;
     pos = 0;
@@ -24,6 +21,17 @@ int     find_target_position(t_stack *stack_a, int value)
         current = current->next;
         pos++;
     }
+    return (target_pos);
+}
+
+// Find where value from B should be inserted in sorted A
+int     find_target_position(t_stack *stack_a, int value)
+{
+    int     target_pos;
+
+    if (!stack_a || !stack_a->top)
+        return (0);
+    target_pos = find_best_insert_pos(stack_a, value);
     if (target_pos == -1)
         return (get_position_in_stack(stack_a, find_min(stack_a)));
     return (target_pos);

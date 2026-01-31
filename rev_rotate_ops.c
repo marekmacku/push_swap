@@ -1,6 +1,6 @@
 #include "push_swap.h"
 
-void	reverse_rotate(t_stack *stack)
+static void	reverse_rotate(t_stack *stack)
 {
     t_node	*first;
     t_node	*tmp;

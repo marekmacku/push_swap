@@ -19,8 +19,7 @@ static void set_move_directions(t_move *move, int b_dir, int a_dir)
     move->a_dir = a_dir;
 }
 
-static void check_and_update_move(t_move_context *ctx,
-    t_element_info *elem)
+static void check_and_update_move(t_move_context *ctx, t_element_info *elem)
 {
     int target_pos;
     int total_cost;

@@ -56,12 +56,24 @@ typedef struct s_rotation_data
 	int		a_cost;
 }	t_rotation_data;
 
+/* Structure for chunk configuration */
+typedef struct s_chunk
+{
+	int	index;
+	int	count;
+	int	total_size;
+}	t_chunk;
+
+/* Structure for chunk range info */
+typedef struct s_chunk_range
+{
+	int	min;
+	int	max;
+	int	target_size;
+}	t_chunk_range;
+
 /* Stack operations */
 void	push(t_stack **stack, t_node *node);
-void	pop(t_stack **stack);
-void	swap(t_stack *stack);
-void	rotate(t_stack *stack);
-void	reverse_rotate(t_stack *stack);
 
 /* Push_swap operations */
 void	sa(t_stack *a);
@@ -81,6 +93,7 @@ char    **ft_split(char const *s, char c);
 int		ft_isdigit(char c);
 int		parse_input(char **raw_input, t_stack *stack);
 int		has_duplicates(t_stack *stack);
+int parse_and_validate_int(char *str, int *value);
 
 // Sort functions
 int		is_sorted(t_stack *stack);
@@ -94,21 +107,20 @@ void	normalize(t_stack *stack_a);
 
 // Chunking functions for large stacks
 int		calculate_chunk_count(int size);
-void	get_chunk_range(int chunk_index, int chunk_count, int total_size, int *min, int *max);
+void	get_chunk_range(t_chunk *config, int *min, int *max);
 int		is_in_chunk(int value, int chunk_index, int chunk_count, int total_size);
 int		calculate_rotation_cost(t_stack *stack, int target_value);
 int		find_max_in_stack(t_stack *stack);
 int		get_position_in_stack(t_stack *stack, int target_value);
 void	sort_large(t_stack *stack_a, t_stack *stack_b, int size);
 void	push_chunks_to_b(t_stack *stack_a, t_stack *stack_b, int chunk_count, int total_size);
-void	push_back_to_a(t_stack *stack_a, t_stack *stack_b);
+void	push_back_to_a(t_stack *a, t_stack *b);
 void	rotate_to_top(t_stack *stack, int target_value, int is_stack_a);
 void	maintain_descending_order_b(t_stack *stack_b, int value);
 
 // Optimized chunking functions
 void	find_cheapest_move(t_stack *stack_a, t_stack *b, t_move *move);
 void	execute_move(t_stack *a, t_stack *b, t_move *move);
-void	push_back_to_a_optimized(t_stack *a, t_stack *b);
 
 int find_largest_cheapest_in_chunk(t_stack *stack, int min_val, int max_val);
 
@@ -121,5 +133,15 @@ void do_common_rotations(t_stack *a, t_stack *b, int count, int dir);
 int		find_target_position(t_stack *stack_a, int value);
 void calc_dir_cost(int pos, int size, int *dir, int *cost);
 int     total_rotation_costs(int a_cost, int b_cost, int a_dir, int b_dir);
+
+// Quick sort
+void	quicksort(int *arr, int low, int high);
+
+// Sort for 5 utils
+void	finalize_stack_b(t_stack *stack_a, t_stack *stack_b);
+void	rotate_to_closest_min(t_stack *stack_a, int min1, int min2);
+int	find_closest_pos(t_stack *stack_a, int min1, int min2);
+void	get_three_values(t_stack *stack_a, int *first, int *second, int *third);
+void	apply_three_sort(t_stack *stack_a, int first, int second, int third);
 
 #endif
