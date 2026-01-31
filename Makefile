@@ -22,7 +22,8 @@ SRCS = main.c \
 	quick_sort.c \
 	parser_utils.c \
 	sorts.c \
-	move_utils.c
+	move_utils.c \
+	main_utils.c
 
 OBJS = $(SRCS:.c=.o)
 

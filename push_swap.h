@@ -102,26 +102,18 @@ void	sort_for_four(t_stack *stack_a, t_stack *stack_b);
 void	sort_for_five(t_stack *stack_a, t_stack *stack_b);
 int		find_min(t_stack *stack);
 int		find_second_min(t_stack *stack, int min1);
-void	decide_sort(t_stack *stack_a, t_stack *stack_b, int size);
 void	normalize(t_stack *stack_a);
 
 // Chunking functions for large stacks
 int		calculate_chunk_count(int size);
 void	get_chunk_range(t_chunk *config, int *min, int *max);
-int		is_in_chunk(int value, int chunk_index, int chunk_count, int total_size);
-int		calculate_rotation_cost(t_stack *stack, int target_value);
-int		find_max_in_stack(t_stack *stack);
 int		get_position_in_stack(t_stack *stack, int target_value);
 void	sort_large(t_stack *stack_a, t_stack *stack_b, int size);
 void	push_chunks_to_b(t_stack *stack_a, t_stack *stack_b, int chunk_count, int total_size);
 void	push_back_to_a(t_stack *a, t_stack *b);
 void	rotate_to_top(t_stack *stack, int target_value, int is_stack_a);
-void	maintain_descending_order_b(t_stack *stack_b, int value);
-
-// Optimized chunking functions
 void	find_cheapest_move(t_stack *stack_a, t_stack *b, t_move *move);
 void	execute_move(t_stack *a, t_stack *b, t_move *move);
-
 int find_largest_cheapest_in_chunk(t_stack *stack, int min_val, int max_val);
 
 // Common rotations
@@ -143,5 +135,9 @@ void	rotate_to_closest_min(t_stack *stack_a, int min1, int min2);
 int	find_closest_pos(t_stack *stack_a, int min1, int min2);
 void	get_three_values(t_stack *stack_a, int *first, int *second, int *third);
 void	apply_three_sort(t_stack *stack_a, int first, int second, int third);
+
+// Main utils
+int handle_error();
+void	decide_sort(t_stack *stack_a, t_stack *stack_b, int size);
 
 #endif

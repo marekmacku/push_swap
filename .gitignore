@@ -31,3 +31,5 @@ test_sort_large.c
 .DS_Store
 Thumbs.db
 
+test.txt
+numbers.txt
