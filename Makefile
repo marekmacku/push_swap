@@ -4,16 +4,20 @@ CC = cc
 CFLAGS = -Wall -Wextra -Werror
 
 SRCS = main.c \
-	basic_operations.c \
 	chunking.c \
 	ft_split.c \
 	isDigit.c \
 	normalize.c \
-	operations_reverse_rotate.c \
-	operations_rotate.c \
-	operations.c \
+	rev_rotate_ops.c \
+	rotate_ops.c \
 	parser.c \
-	sort_utils.c
+	sort_utils.c \
+	find_best_in_chunk.c \
+	common_rotations.c \
+	update_move_utils.c \
+	find_cheapest_move.c \
+	push_ops.c \
+	swap_ops.c
 
 OBJS = $(SRCS:.c=.o)
 

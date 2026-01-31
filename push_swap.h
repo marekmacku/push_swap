@@ -31,6 +31,31 @@ typedef struct s_move
 	int		cost;
 }	t_move;
 
+/* Structure for element being evaluated */
+typedef struct s_element_info
+{
+	int		b_pos;
+	int		value;
+}	t_element_info;
+
+/* Structure for move context (stacks, move and best cost) */
+typedef struct s_move_context
+{
+	t_stack	*stack_a;
+	t_stack	*stack_b;
+	t_move	*move;
+	int		*best_cost;
+}	t_move_context;
+
+/* Structure for rotation cost and direction data */
+typedef struct s_rotation_data
+{
+	int		b_dir;
+	int		a_dir;
+	int		b_cost;
+	int		a_cost;
+}	t_rotation_data;
+
 /* Stack operations */
 void	push(t_stack **stack, t_node *node);
 void	pop(t_stack **stack);
@@ -79,11 +104,22 @@ void	push_chunks_to_b(t_stack *stack_a, t_stack *stack_b, int chunk_count, int t
 void	push_back_to_a(t_stack *stack_a, t_stack *stack_b);
 void	rotate_to_top(t_stack *stack, int target_value, int is_stack_a);
 void	maintain_descending_order_b(t_stack *stack_b, int value);
+
 // Optimized chunking functions
-int		find_target_position(t_stack *stack_a, int value);
-int		calculate_move_cost(t_stack *stack_a, t_stack *stack_b, int b_pos, int a_target_pos);
 void	find_cheapest_move(t_stack *stack_a, t_stack *b, t_move *move);
 void	execute_move(t_stack *a, t_stack *b, t_move *move);
 void	push_back_to_a_optimized(t_stack *a, t_stack *b);
+
+int find_largest_cheapest_in_chunk(t_stack *stack, int min_val, int max_val);
+
+// Common rotations
+void do_b_rotations(t_stack *b, int cost, int dir);
+void do_a_rotations(t_stack *a, int cost, int dir);
+void do_common_rotations(t_stack *a, t_stack *b, int count, int dir);
+
+// Update move
+int		find_target_position(t_stack *stack_a, int value);
+void calc_dir_cost(int pos, int size, int *dir, int *cost);
+int     total_rotation_costs(int a_cost, int b_cost, int a_dir, int b_dir);
 
 #endif
