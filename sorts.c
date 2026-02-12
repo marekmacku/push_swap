@@ -75,4 +75,9 @@ void	sort_large(t_stack *stack_a, t_stack *stack_b, int size)
     chunk_count = calculate_chunk_count(size);
     push_chunks_to_b(stack_a, stack_b, chunk_count, size);
     push_back_to_a(stack_a, stack_b);
+    if (!is_sorted(stack_a))
+        write(2, "ERROR: Not Linear\n", 19);
+    if (!is_circularly_sorted(stack_a))
+        write(2, "ERROR: Not Circular\n", 20);
+
 }

@@ -63,3 +63,29 @@ int find_second_min(t_stack *stack, int min1)
     }
     return (min2);
 }
+
+int	is_circularly_sorted(t_stack *stack)
+{
+	t_node	*current;
+	int		breaks;
+	int		first_value;
+	int		last_value;
+
+	if (!stack || !stack->top || !stack->top->next)
+		return (1);
+	breaks = 0;
+	current = stack->top;
+	first_value = current->value;
+	while (current->next)
+	{
+		if (current->value > current->next->value)
+			breaks++;
+		current = current->next;
+	}
+	last_value = current->value;
+	if (last_value > first_value)
+		breaks++;
+	if (breaks <= 1)
+		return (1);
+	return (0);
+}

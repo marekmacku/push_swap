@@ -1,0 +1,3 @@
+ARG="$(seq 1 500 | sort -R | tr '\n' ' ')"
+echo "$ARG" > numbers.txt
+./push_swap $ARG > test.txt

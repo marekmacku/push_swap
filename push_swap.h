@@ -97,6 +97,7 @@ int parse_and_validate_int(char *str, int *value);
 
 // Sort functions
 int		is_sorted(t_stack *stack);
+int		is_circularly_sorted(t_stack *stack);
 void	sort_for_three(t_stack *stack_a);
 void	sort_for_four(t_stack *stack_a, t_stack *stack_b);
 void	sort_for_five(t_stack *stack_a, t_stack *stack_b);
