@@ -1,142 +1,141 @@
-# Push_swap Implementation Plan
+# Push_swap: Turk Algorithm Implementation Plan
 
-## Overview
+## Context
 
-This project requires implementing a sorting algorithm using two stacks (a and b) with limited operations. The goal is to minimize operations to meet strict benchmarks: <700 operations for 100 numbers and <5500 operations for 500 numbers.
+The current push_swap uses a chunk-based sorting algorithm that pushes elements to stack B in chunk ranges (highest-first), then uses greedy cost-based insertion to push them back to A. This approach has two critical problems:
 
-## Algorithm Strategy
+1. **Phase 1 (A-to-B) is suboptimal**: Chunks are pushed without considering B's state at all. The "largest cheapest in chunk" heuristic doesn't maintain any ordering in B, leading to expensive Phase 2 insertions.
+2. **Missing final rotation**: After Phase 2, stack A is circularly sorted but the code never rotates the minimum to the top. The error prints on lines 78-81 of `sorts.c` confirm this awareness but the fix is absent.
 
-### Best Algorithms for This Problem
+The **Turk algorithm** is the proven solution for these benchmarks. It replaces Phase 1 with a cost-optimized push that maintains B in descending order, keeps the existing Phase 2 (which already works correctly), and adds the missing final rotation. Typical results: **550-650 ops for 100 numbers, 4800-5300 for 500**.
 
-1. **Hardcoded Solutions (3-5 elements)**
+---
 
-- For 3 elements: Use a lookup table or decision tree (max 2-3 operations)
-- For 5 elements: Use a lookup table or decision tree (max 12 operations)
-- These are optimal and should be handled separately
+## What Changes
 
-2. **Chunk-Based Algorithm (100+ elements)** - RECOMMENDED
+### Files to MODIFY (4 files):
 
-- Divide the stack into chunks (e.g., 5-7 chunks for 100 numbers, 8-12 chunks for 500 numbers)
-- Push elements to stack b based on which chunk they belong to
-- Maintain some order in stack b (e.g., keep larger numbers at top)
-- Push back to stack a in sorted order
-- **Expected performance**: ~500-650 operations for 100 numbers, ~4500-5200 for 500 numbers
+| File | Change |
+|------|--------|
+| `push_swap.h` | Remove chunk structs/declarations, add new function declarations |
+| `chunking.c` | **Full rewrite** -> Turk Phase 1 core (find_target_in_b, push_all_to_b) |
+| `find_best_in_chunk.c` | **Full rewrite** -> Phase 1 cost calculator (find_cheapest_push_to_b) |
+| `sorts.c` | Modify `sort_large()`, add `final_rotation()` |
 
-3. **Turk Algorithm** (Advanced variant)
+### Files UNCHANGED (16 files):
 
-- Similar to chunk-based but with cost calculation
-- For each element, calculate the cost to move it to the correct position
-- Choose the element with minimum cost
-- More complex but can achieve lower operation counts
+All operation files, parsing files, `main.c`, `main_utils.c`, `normalize.c`, `quick_sort.c`, `sort_utils.c`, `sort_utils_2.c`, `find_cheapest_move.c`, `move_utils.c`, `update_move_utils.c`, `common_rotations.c`, `Makefile`.
 
-4. **Hybrid Approach** (Best for 100% validation)
+---
 
-- Small stacks (≤5): Hardcoded optimal solutions
-- Medium stacks (6-100): Chunk-based with optimized chunk size
-- Large stacks (101-500): Chunk-based with dynamic chunk sizing
+## Phase 1: Update `push_swap.h`
 
-## Implementation Structure
+**Remove** `t_chunk` and `t_chunk_range` structs.
 
-### Core Components
+**Remove** declarations: `calculate_chunk_count`, `get_chunk_range`, `push_chunks_to_b`, `find_largest_cheapest_in_chunk`.
 
-1. **Stack Data Structure**
-
-- Implement a stack using a linked list or array
-- Support operations: push, pop, swap, rotate, reverse_rotate
-- Track stack size and top element
-
-2. **Input Parsing & Validation**
-
-- Parse command-line arguments into integers
-- Validate: integers only, no duplicates, within INT limits
-- Handle error cases (display "Error\n" on stderr)
-
-3. **Operations Implementation**
-
-- Implement all 11 operations: sa, sb, ss, pa, pb, ra, rb, rr, rra, rrb, rrr
-- Operations should modify the stacks and can optionally print the operation name
-
-4. **Sorting Logic**
-
-- **Small stacks (≤5)**: Hardcoded decision trees or lookup tables
-- **Large stacks**: Chunk-based algorithm with these steps:
-
-a. Calculate optimal chunk size based on stack sizeb. Assign each number to a chunk based on its valuec. Push chunks to stack b (maintain order - larger numbers at top)d. Push back to stack a in sorted order (find minimum, rotate to top, push)
-
-5. **Optimization Techniques**
-
-- Combine operations (e.g., use rr/rrr when both stacks need rotation)
-- Calculate costs before making moves
-- Avoid unnecessary operations
-- Use reverse operations when they're cheaper
-
-## File Structure
-
-```javascript
-push_swap/
-├── Makefile
-├── push_swap.h (header file)
-├── main.c (entry point, argument parsing)
-├── stack.c / stack.h (stack data structure and operations)
-├── operations.c (sa, sb, pa, pb, ra, rb, rra, rrb, ss, rr, rrr)
-├── validation.c (input validation, duplicate checking)
-├── sort_small.c (hardcoded solutions for 3-5 elements)
-├── sort_large.c (chunk-based algorithm)
-└── utils.c (helper functions: find_min, find_max, get_position, etc.)
+**Add** declarations:
+```c
+int     find_max(t_stack *stack);
+int     find_target_in_b(t_stack *stack_b, int value);
+void    find_cheapest_push_to_b(t_stack *a, t_stack *b, t_move *move);
+void    push_all_to_b(t_stack *stack_a, t_stack *stack_b);
+void    final_rotation(t_stack *stack_a);
 ```
 
+---
 
+## Phase 2: Rewrite `chunking.c` — Turk Phase 1 Core
 
-## Key Algorithm Details
+Delete all current content. New file has 5 functions (norminette max):
 
-### Chunk-Based Algorithm Steps:
+### `find_max(t_stack *stack)` — public
+Linear scan for maximum value. Mirrors existing `find_min()`.
 
-1. **Chunk Calculation**
+### `find_best_spot_in_b(t_stack *b, int value)` — static
+Scans B for the **largest value that is strictly less than `value`**. Returns its position. Returns -1 if none found. This is the mirror of `find_best_insert_pos()` in update_move_utils.c (which finds smallest value > target for Phase 2).
 
-- For N elements, use approximately sqrt(N) to N/10 chunks
-- Example: 100 numbers → 5-7 chunks, 500 numbers → 8-12 chunks
+### `find_target_in_b(t_stack *stack_b, int value)` — public
+Calls `find_best_spot_in_b()`. If result is -1 (value is smaller than everything in B), falls back to position of max in B. This maintains B in circularly-descending order.
 
-2. **Pushing to Stack B**
+**Why this works**: When we `pb`, the value lands on TOP of B. If we rotate B so the "target" (largest value < ours) is on top, then after pb our new value sits above it — correct descending order. If our value is the new minimum, we place it above the maximum (circular wrap).
 
-- Iterate through stack a
-- For each element, determine its target chunk
-- Push to stack b, maintaining order (larger numbers stay at top)
-- Use rotations to position elements optimally
+### `push_initial_two(t_stack *a, t_stack *b)` — static
+Simply calls `pb` twice. With 0-1 elements in B, no cost calculation is meaningful.
 
-3. **Pushing Back to Stack A**
+### `push_all_to_b(t_stack *stack_a, t_stack *stack_b)` — public
+Main Phase 1 loop:
+1. Guard: return if `stack_a->size <= 3`
+2. Call `push_initial_two()`
+3. While `stack_a->size > 3`: call `find_cheapest_push_to_b()` to find optimal element, call `execute_move()` to rotate both stacks, call `pb()` to push
 
-- Find the maximum element in stack b
-- Rotate stack b to bring it to top
-- Push to stack a
-- Repeat until stack b is empty
-- Finally, rotate stack a to put minimum at top
+---
 
-### Optimization Tips:
+## Phase 3: Rewrite `find_best_in_chunk.c` — Phase 1 Cost Calculator
 
-- **Cost Calculation**: Before each move, calculate the cost (number of rotations needed) for each possible action
-- **Operation Combination**: Use rr/rrr/ss when both stacks need the same operation
-- **Smart Rotations**: Choose ra or rra based on which requires fewer operations
-- **Chunk Size Tuning**: Experiment with different chunk sizes to find optimal performance
+Delete all current content. New file has 3 functions:
 
-## Testing Strategy
+### `set_move_data(t_move *move, t_element_info *elem, t_rotation_data *rot, int target_pos)` — static
+Sets all fields of `t_move` from the computed rotation data. Keeps `a_cost/a_dir` for stack A rotations and `b_cost/b_dir` for stack B rotations, consistent with how `execute_move()` reads them.
 
-1. Test with 3, 4, 5 elements (should be optimal)
-2. Test with 100 random numbers (must be <700 operations)
-3. Test with 500 random numbers (must be <5500 operations)
-4. Test edge cases: already sorted, reverse sorted, duplicates (should error)
+### `check_and_update_push(t_move_context *ctx, t_element_info *elem)` — static
+For one element in A: calls `find_target_in_b()` to get target position in B, calls `calc_dir_cost()` twice (once for A position, once for B target), calls `total_rotation_costs()` for combined cost, updates move if cheapest. Mirrors `check_and_update_move()` from `find_cheapest_move.c`.
 
+### `find_cheapest_push_to_b(t_stack *a, t_stack *b, t_move *move)` — public
+Iterates all elements in A, calls `check_and_update_push()` for each. After loop, `move` contains the optimal push. Mirrors `find_cheapest_move()` from `find_cheapest_move.c`.
 
+**Key reuse**: `calc_dir_cost()`, `total_rotation_costs()`, `execute_move()` — all existing infrastructure works identically for both push directions. The `t_move` struct fields `a_cost/a_dir` always control stack A rotation and `b_cost/b_dir` always control stack B rotation.
 
-### New Checklist
-Implementation checklist
-- [ ] Pre-processing: Normalize values to ranks 0..N-1
-- [ ] Chunk calculation: Use N/11 for 100, N/15-20 for 500
-- [ ] Phase 1: Process chunks sequentially, one at a time
-- [ ] Intra-chunk sorting: Push to B in descending order
-- [ ] Rotation optimization: Always use cheapest direction (ra vs rra)
-- [ ] Operation combination: Use rr/rrr when possible
-- [ ] Phase 2: Push maximums from sorted-descending chunks
-- [ ] LIS detection: Preserve sorted prefixes
-- [ ] Hardcoded cases: n≤5 use optimal solutions
-- [ ] Testing: Validate with 1000 random inputs
-This corrected algorithm guarantees benchmark compliance and is simpler than radix-based approaches.
+---
+
+## Phase 4: Modify `sorts.c`
+
+### Modify `sort_large()`:
+```
+sort_large(stack_a, stack_b, size):
+    push_all_to_b(stack_a, stack_b)   // Turk Phase 1
+    sort_for_three(stack_a)            // Sort remaining 3
+    push_back_to_a(stack_a, stack_b)   // Phase 2 (existing, unchanged)
+    final_rotation(stack_a)            // Phase 3 (NEW)
+```
+
+### Add `final_rotation(t_stack *stack_a)`:
+1. Early exit if already sorted
+2. Find min value with `find_min()`
+3. Rotate min to top with `rotate_to_top()` (already picks cheapest direction)
+
+File total: 5 functions (sort_for_three, sort_for_four, sort_for_five, sort_large, final_rotation). Norminette OK.
+
+---
+
+## Norminette Compliance
+
+| File | Functions | Max line count | Params max |
+|------|-----------|----------------|------------|
+| `chunking.c` | 5 (2 static, 3 public) | ~21 lines | 2 params |
+| `find_best_in_chunk.c` | 3 (2 static, 1 public) | ~23 lines | 4 params |
+| `sorts.c` | 5 (0 static, 5 public) | ~13 lines | 3 params |
+| `push_swap.h` | N/A | N/A | N/A |
+
+All functions under 25 lines. All files at or under 5 functions. All functions have max 4 parameters.
+
+---
+
+## Verification
+
+```bash
+# Build
+make re
+
+# 100-number benchmark (run multiple times, all must be < 700):
+ARG=$(python3 -c "import random; l=list(range(1,101)); random.shuffle(l); print(' '.join(map(str,l)))"); ./push_swap $ARG | wc -l
+
+# 500-number benchmark (run multiple times, all must be < 5500):
+ARG=$(python3 -c "import random; l=list(range(1,501)); random.shuffle(l); print(' '.join(map(str,l)))"); ./push_swap $ARG | wc -l
+
+# Edge cases:
+./push_swap 1          # 0 operations
+./push_swap 2 1        # 1 operation (sa)
+./push_swap 1 2 3      # 0 operations (already sorted)
+./push_swap 42         # 0 operations
+```

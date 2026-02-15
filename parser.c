@@ -30,28 +30,47 @@ static t_node *create_node(int value)
     return (new_node);
 }
 
-int parse_input(char **raw_input, t_stack *stack)
+static void	append_bottom(t_stack *stack, t_node *node)
 {
-    int		i;
-    int		value;
-    t_node	*new_node;
+	t_node	*tmp;
 
-    if (!raw_input || !stack)
-        return (0);
-    stack->top = NULL;
-    stack->size = 0;
-    i = 0;
-    while (raw_input[i])
-    {
-        if (!is_valid_integer_format(raw_input[i]))
-            return (0);
-        if (!parse_and_validate_int(raw_input[i], &value))
-            return (0);
-        new_node = create_node(value);
-        if (!new_node)
-            return (0);
-        push(&stack, new_node);
-        i++;
-    }
-    return (1);
+	if (!stack->top)
+	{
+		stack->top = node;
+	}
+	else
+	{
+		tmp = stack->top;
+		while (tmp->next)
+			tmp = tmp->next;
+		tmp->next = node;
+	}
+	node->next = NULL;
+	stack->size++;
+}
+
+int	parse_input(char **raw_input, t_stack *stack)
+{
+	int		i;
+	int		value;
+	t_node	*new_node;
+
+	if (!raw_input || !stack)
+		return (0);
+	stack->top = NULL;
+	stack->size = 0;
+	i = 0;
+	while (raw_input[i])
+	{
+		if (!is_valid_integer_format(raw_input[i]))
+			return (0);
+		if (!parse_and_validate_int(raw_input[i], &value))
+			return (0);
+		new_node = create_node(value);
+		if (!new_node)
+			return (0);
+		append_bottom(stack, new_node);
+		i++;
+	}
+	return (1);
 }

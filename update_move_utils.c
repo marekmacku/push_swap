@@ -7,7 +7,7 @@ static int  find_best_insert_pos(t_stack *stack_a, int value)
     int     pos;
     t_node  *current;
 
-    best_val = stack_a->size;
+    best_val = INT_MAX;
     target_pos = -1;
     pos = 0;
     current = stack_a->top;

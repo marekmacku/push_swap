@@ -64,20 +64,23 @@ void sort_for_five(t_stack *stack_a, t_stack *stack_b)
     finalize_stack_b(stack_a, stack_b);
 }
 
-/* Main function to sort large stacks using chunk-based algorithm */
+void	final_rotation(t_stack *stack_a)
+{
+	int	min;
+
+	if (is_sorted(stack_a))
+		return ;
+	min = find_min(stack_a);
+	rotate_to_top(stack_a, min, 1);
+}
+
 void	sort_large(t_stack *stack_a, t_stack *stack_b, int size)
 {
-    int chunk_count;
-    
-    if (!stack_a || !stack_a->top)
-        return ;
-    
-    chunk_count = calculate_chunk_count(size);
-    push_chunks_to_b(stack_a, stack_b, chunk_count, size);
-    push_back_to_a(stack_a, stack_b);
-    if (!is_sorted(stack_a))
-        write(2, "ERROR: Not Linear\n", 19);
-    if (!is_circularly_sorted(stack_a))
-        write(2, "ERROR: Not Circular\n", 20);
-
+	if (!stack_a || !stack_a->top)
+		return ;
+	(void)size;
+	push_all_to_b(stack_a, stack_b);
+	sort_for_three(stack_a);
+	push_back_to_a(stack_a, stack_b);
+	final_rotation(stack_a);
 }

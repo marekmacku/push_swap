@@ -54,7 +54,7 @@ void	rotate_to_closest_min(t_stack *stack_a, int min1, int min2)
 
 void	finalize_stack_b(t_stack *stack_a, t_stack *stack_b)
 {
-    if (stack_b->size == 2 && stack_b->top->value > stack_b->top->next->value)
+    if (stack_b->size == 2 && stack_b->top->value < stack_b->top->next->value)
         sb(stack_b);
     while (stack_b->size > 0)
         pa(stack_a, stack_b);

@@ -1,74 +1,76 @@
 #include "push_swap.h"
 
-int calculate_chunk_count(int size)
+int	find_max(t_stack *stack)
 {
-    if (size <= 16)
-        return 1;
-    else if (size <= 100)
-        return 5;  // ~20 per chunk
-    else if (size <= 500)
-        return 11; // ~45 per chunk
-    else
-        return size / 50;
-}
+	t_node	*current;
+	int		max;
 
-void get_chunk_range(t_chunk *chunk, int *min, int *max)
-{
-    int chunk_size;
-    
-    chunk_size = chunk->total_size / chunk->count;
-    *min = chunk->index * chunk_size;
-    if (chunk->index == chunk->count - 1)
-        *max = chunk->total_size - 1;
-    else
-        *max = *min + chunk_size - 1;
-}
-
-static int	calculate_target_size(int chunk_index, int chunk_count, int total_size)
-{
-	int	size;
-
-	size = total_size / chunk_count;
-	if (chunk_index == chunk_count - 1)
-		size += total_size % chunk_count;
-	return (size);
-}
-
-static void	push_chunk_elements(t_stack *stack_a, t_stack *stack_b, t_chunk_range *range)
-{
-	int	target;
-	int	pushed;
-
-	pushed = 0;
-	while (pushed < range->target_size && stack_a->size > 0)
+	if (!stack || !stack->top)
+		return (0);
+	current = stack->top;
+	max = current->value;
+	while (current)
 	{
-		target = find_largest_cheapest_in_chunk(stack_a, range->min, range->max);
-		if (target == -1)
-			break ;
-		rotate_to_top(stack_a, target, 1);
-		pb(stack_a, stack_b);
-		pushed++;
+		if (current->value > max)
+			max = current->value;
+		current = current->next;
 	}
+	return (max);
 }
 
-/* Phase 1: Push chunks to stack B sequentially */
-void	push_chunks_to_b(t_stack *stack_a, t_stack *stack_b, int chunk_count, int total_size)
+static int	find_best_spot_in_b(t_stack *b, int value)
 {
-	int				chunk_idx;
-	t_chunk			chunk;
-	t_chunk_range	range;
+	t_node	*current;
+	int		best_val;
+	int		target_pos;
+	int		pos;
 
-	if (!stack_a || !stack_a->top)
-		return ;
-	chunk_idx = chunk_count - 1;
-	chunk.count = chunk_count;
-	chunk.total_size = total_size;
-	while (chunk_idx >= 0 && stack_a->size > 0)
+	best_val = -1;
+	target_pos = -1;
+	pos = 0;
+	current = b->top;
+	while (current)
 	{
-		chunk.index = chunk_idx;
-		get_chunk_range(&chunk, &range.min, &range.max);
-		range.target_size = calculate_target_size(chunk_idx, chunk_count, total_size);
-		push_chunk_elements(stack_a, stack_b, &range);
-		chunk_idx--;
+		if (current->value < value && current->value > best_val)
+		{
+			best_val = current->value;
+			target_pos = pos;
+		}
+		current = current->next;
+		pos++;
+	}
+	return (target_pos);
+}
+
+int	find_target_in_b(t_stack *stack_b, int value)
+{
+	int	target_pos;
+
+	if (!stack_b || !stack_b->top)
+		return (0);
+	target_pos = find_best_spot_in_b(stack_b, value);
+	if (target_pos == -1)
+		return (get_position_in_stack(stack_b, find_max(stack_b)));
+	return (target_pos);
+}
+
+static void	push_initial_two(t_stack *a, t_stack *b)
+{
+	pb(a, b);
+	pb(a, b);
+}
+
+void	push_all_to_b(t_stack *stack_a, t_stack *stack_b)
+{
+	t_move	move;
+
+	if (stack_a->size <= 3)
+		return ;
+	push_initial_two(stack_a, stack_b);
+	while (stack_a->size > 3)
+	{
+		find_cheapest_push_to_b(stack_a, stack_b, &move);
+		execute_move(stack_a, stack_b, &move);
+		pb(stack_a, stack_b);
 	}
 }

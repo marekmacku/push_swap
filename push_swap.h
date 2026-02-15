@@ -56,21 +56,6 @@ typedef struct s_rotation_data
 	int		a_cost;
 }	t_rotation_data;
 
-/* Structure for chunk configuration */
-typedef struct s_chunk
-{
-	int	index;
-	int	count;
-	int	total_size;
-}	t_chunk;
-
-/* Structure for chunk range info */
-typedef struct s_chunk_range
-{
-	int	min;
-	int	max;
-	int	target_size;
-}	t_chunk_range;
 
 /* Stack operations */
 void	push(t_stack **stack, t_node *node);
@@ -105,17 +90,18 @@ int		find_min(t_stack *stack);
 int		find_second_min(t_stack *stack, int min1);
 void	normalize(t_stack *stack_a);
 
-// Chunking functions for large stacks
-int		calculate_chunk_count(int size);
-void	get_chunk_range(t_chunk *config, int *min, int *max);
+// Large sort functions
 int		get_position_in_stack(t_stack *stack, int target_value);
 void	sort_large(t_stack *stack_a, t_stack *stack_b, int size);
-void	push_chunks_to_b(t_stack *stack_a, t_stack *stack_b, int chunk_count, int total_size);
 void	push_back_to_a(t_stack *a, t_stack *b);
 void	rotate_to_top(t_stack *stack, int target_value, int is_stack_a);
 void	find_cheapest_move(t_stack *stack_a, t_stack *b, t_move *move);
 void	execute_move(t_stack *a, t_stack *b, t_move *move);
-int find_largest_cheapest_in_chunk(t_stack *stack, int min_val, int max_val);
+int		find_max(t_stack *stack);
+int		find_target_in_b(t_stack *stack_b, int value);
+void	find_cheapest_push_to_b(t_stack *a, t_stack *b, t_move *move);
+void	push_all_to_b(t_stack *stack_a, t_stack *stack_b);
+void	final_rotation(t_stack *stack_a);
 
 // Common rotations
 void do_b_rotations(t_stack *b, int cost, int dir);
