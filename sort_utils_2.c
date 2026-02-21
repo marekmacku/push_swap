@@ -29,33 +29,34 @@ void	apply_three_sort(t_stack *stack_a, int first, int second, int third)
 
 int	find_closest_pos(t_stack *stack_a, int min1, int min2)
 {
-    int pos1;
-    int pos2;
-    int closest_pos;
+	int	pos1;
+	int	pos2;
+	int	closest_pos;
 
-    pos1 = get_position_in_stack(stack_a, min1);
-    pos2 = get_position_in_stack(stack_a, min2);
-    closest_pos = pos1;
-    if (pos2 != -1 && (pos1 == -1 || pos2 < pos1))
-        closest_pos = pos2;
-    return (closest_pos);
+	pos1 = get_position_in_stack(stack_a, min1);
+	pos2 = get_position_in_stack(stack_a, min2);
+	closest_pos = pos1;
+	if (pos2 != -1 && (pos1 == -1 || pos2 < pos1))
+		closest_pos = pos2;
+	return (closest_pos);
 }
 
 void	rotate_to_closest_min(t_stack *stack_a, int min1, int min2)
 {
-    int closest_pos;
+	int	closest_pos;
 
-    closest_pos = find_closest_pos(stack_a, min1, min2);
-    if (closest_pos <= stack_a->size / 2)
-        ra(stack_a);
-    else
-        rra(stack_a);
+	closest_pos = find_closest_pos(stack_a, min1, min2);
+	if (closest_pos <= stack_a->size / 2)
+		ra(stack_a);
+	else
+		rra(stack_a);
 }
 
 void	finalize_stack_b(t_stack *stack_a, t_stack *stack_b)
 {
-    if (stack_b->size == 2 && stack_b->top->value < stack_b->top->next->value)
-        sb(stack_b);
-    while (stack_b->size > 0)
-        pa(stack_a, stack_b);
+	if (stack_b->size == 2
+		&& stack_b->top->value < stack_b->top->next->value)
+		sb(stack_b);
+	while (stack_b->size > 0)
+		pa(stack_a, stack_b);
 }

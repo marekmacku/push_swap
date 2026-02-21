@@ -6,7 +6,7 @@ CFLAGS = -Wall -Wextra -Werror
 SRCS = main.c \
 	chunking.c \
 	ft_split.c \
-	isDigit.c \
+	ft_isdigit.c \
 	normalize.c \
 	rev_rotate_ops.c \
 	rotate_ops.c \

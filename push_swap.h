@@ -56,7 +56,6 @@ typedef struct s_rotation_data
 	int		a_cost;
 }	t_rotation_data;
 
-
 /* Stack operations */
 void	push(t_stack **stack, t_node *node);
 
@@ -74,13 +73,13 @@ void	rrb(t_stack *b);
 void	rrr(t_stack *a, t_stack *b);
 
 /* Utility functions */
-char    **ft_split(char const *s, char c);
+char	**ft_split(char const *s, char c);
 int		ft_isdigit(char c);
 int		parse_input(char **raw_input, t_stack *stack);
 int		has_duplicates(t_stack *stack);
-int parse_and_validate_int(char *str, int *value);
+int		parse_and_validate_int(char *str, int *value);
 
-// Sort functions
+/* Sort functions */
 int		is_sorted(t_stack *stack);
 int		is_circularly_sorted(t_stack *stack);
 void	sort_for_three(t_stack *stack_a);
@@ -90,7 +89,7 @@ int		find_min(t_stack *stack);
 int		find_second_min(t_stack *stack, int min1);
 void	normalize(t_stack *stack_a);
 
-// Large sort functions
+/* Large sort functions */
 int		get_position_in_stack(t_stack *stack, int target_value);
 void	sort_large(t_stack *stack_a, t_stack *stack_b, int size);
 void	push_back_to_a(t_stack *a, t_stack *b);
@@ -103,28 +102,31 @@ void	find_cheapest_push_to_b(t_stack *a, t_stack *b, t_move *move);
 void	push_all_to_b(t_stack *stack_a, t_stack *stack_b);
 void	final_rotation(t_stack *stack_a);
 
-// Common rotations
-void do_b_rotations(t_stack *b, int cost, int dir);
-void do_a_rotations(t_stack *a, int cost, int dir);
-void do_common_rotations(t_stack *a, t_stack *b, int count, int dir);
+/* Common rotations */
+void	do_b_rotations(t_stack *b, int cost, int dir);
+void	do_a_rotations(t_stack *a, int cost, int dir);
+void	do_common_rotations(t_stack *a, t_stack *b, int count, int dir);
 
-// Update move
+/* Update move */
 int		find_target_position(t_stack *stack_a, int value);
-void calc_dir_cost(int pos, int size, int *dir, int *cost);
-int     total_rotation_costs(int a_cost, int b_cost, int a_dir, int b_dir);
+void	calc_dir_cost(int pos, int size, int *dir, int *cost);
+int		total_rotation_costs(int a_cost, int b_cost, int a_dir, int b_dir);
 
-// Quick sort
+/* Quick sort */
 void	quicksort(int *arr, int low, int high);
 
-// Sort for 5 utils
+/* Sort for 5 utils */
 void	finalize_stack_b(t_stack *stack_a, t_stack *stack_b);
 void	rotate_to_closest_min(t_stack *stack_a, int min1, int min2);
-int	find_closest_pos(t_stack *stack_a, int min1, int min2);
+int		find_closest_pos(t_stack *stack_a, int min1, int min2);
 void	get_three_values(t_stack *stack_a, int *first, int *second, int *third);
 void	apply_three_sort(t_stack *stack_a, int first, int second, int third);
 
-// Main utils
-int handle_error();
+/* Main utils */
+int		handle_error(void);
+void	init_stacks(t_stack *stack_a, t_stack *stack_b);
 void	decide_sort(t_stack *stack_a, t_stack *stack_b, int size);
+void	free_stack(t_stack *stack);
+void	free_split(char **split);
 
 #endif
