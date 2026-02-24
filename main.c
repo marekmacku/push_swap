@@ -38,6 +38,8 @@ static void	cleanup(t_stack *a, t_stack *b, char **input, int is_split)
 
 static void	execute_sort(t_stack *stack_a, t_stack *stack_b)
 {
+	if (is_sorted(stack_a))
+		return ;
 	if (stack_a->size <= 5)
 		decide_sort(stack_a, stack_b, stack_a->size);
 	else
